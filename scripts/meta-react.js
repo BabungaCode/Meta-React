@@ -6,7 +6,7 @@ class Status extends Application {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "elt-status",
       title: "Messages",
-      template: `modules/meta-react/templates/status.hbs`,
+      template: `modules/metareact/templates/status.hbs`,
       width: 300,
       height: 100,
       top: 80,
@@ -16,13 +16,6 @@ class Status extends Application {
     });
   }
 }
-
-Hooks.once("init", () => {
-  console.log("Meta React | Initialising the module.");
-  module = game.modules.get("meta-react");
-  module.status = new Status();
-  module.status.render(true);
-});
 
 const getCurrentUser = () => game.users.current;
 
@@ -47,12 +40,17 @@ const cleanWindowClass = (application) => {
 };
 
 Hooks.once("socketlib.ready", () => {
-  socket = socketlib.registerModule("everybodylikedthis");
+  socket = socketlib.registerModule("metareact");
   socket.register("approval", approval);
   console.log("The socket is ready to be used.");
 });
 
-
+Hooks.once("init", () => {
+  console.log("Meta React | Initialising the module.");
+  module = game.modules.get("metareact");
+  module.status = new Status();
+  module.status.render(true);
+});
 
 Hooks.once("ready", async () => {
   cleanWindowClass(module.status);
