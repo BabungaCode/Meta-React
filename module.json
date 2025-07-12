@@ -2,7 +2,7 @@
   "id": "meta-react",
   "title": "Meta React",
   "description": "Adds meta character reactions to your game!",
-  "authors": [{ "name": "Adam U." }],
+  "authors": [{ "name": "Licht" }],
   "version": "1.0.1",
   "compatibility": {
     "minimum": "13",
