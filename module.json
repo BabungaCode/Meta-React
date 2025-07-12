@@ -23,6 +23,6 @@
   "socket": true,
   "url": "https://github.com/BabungaCode/Meta-React",
   "download": "https://github.com/BabungaCode/Meta-React/archive/refs/tags/F13.zip",
-  "manifest": "https://raw.githubusercontent.com/BabungaCode/Meta-React/refs/heads/main/module.json",
+  "manifest": "https://raw.githubusercontent.com/BabungaCode/Meta-React/main/module.json",
   "bugs": "https://github.com/BabungaCode/Meta-React/issues"
 }
