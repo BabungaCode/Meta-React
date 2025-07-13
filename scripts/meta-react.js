@@ -17,11 +17,13 @@ class Status extends Application {
   }
 }
 
-const getCurrentUser = () => game.users.current;
+const getCurrentUserName = () => canvas.tokens.controlled[0].nameplate._text;
+const getCurrentUserArt = () => canvas.tokens.controlled[0].texture.baseTexture.textureCacheIds[0];
 
 const sendApproval = (approval) => {
-  const user = getCurrentUser();
-  const name = canvas?.tokens?.controlled?.[0]?.name ?? user?.character?.name ?? user.name
+  console.log(approval);
+  const name = getCurrentUserName();
+  const art = getCurrentUserArt();
   socket.executeForEveryone("approval", name, approval);
 };
 
@@ -63,15 +65,15 @@ Hooks.once("ready", async () => {
   );
 });
 
-const approval = (user, approval) => {
+const approval = (name, approval) => {
   let newElement = document.createElement("div");
   //Add transition styles to the new element
   newElement.style.transition = "opacity 1s";
   newElement.style.paddingLeft = "8px";
-
-  newElement.innerHTML = `<p>${user} ${
-    approval ? "approves" : "disapproves"
-  }.</p>`;
+  newElement.style.backgroundImage = art;
+  newElement.style.backgroundSize = "fill";
+  console.log(approval);
+  newElement.innerHTML = `<p>${name} ${approval}.</p>`;
   module.status.element[0].querySelector(".statusbox").appendChild(newElement);
 
   setTimeout(() => {
