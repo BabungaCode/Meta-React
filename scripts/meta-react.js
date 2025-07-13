@@ -80,6 +80,7 @@ class MetaReact {
           return;
         }else if(approvalText === "custom"){
           approvalText = prompt("How does your character react?", "wont remember this.");
+          this.sendApproval(approvalText);
         }
         this.sendApproval(approvalText);
       });
@@ -93,16 +94,17 @@ class MetaReact {
     newContainer.style.padding = "8px";
     newContainer.style.height = "60px";
     newContainer.style.transition = "opacity 1s";
+    newContainer.style.display = "table-cell";
+    newContainer.style.verticalAlign= "bottom";
 
     newContainer.style.backgroundImage = `url(${art})`;
     newContainer.style.backgroundSize = "cover";
     newContainer.style.backgroundPosition = "100% " + imgpos;
     
     newTitle.innerHTML = `${name} ${approval}`;
-    newTitle.style.position = "relative"
-    newTitle.style.backgroundColor = "#0000005e"
-    newTitle.style.fontSize = "16px";
-    newTitle.style.bottom = "0px";
+    newTitle.style.position = "relative";
+    newTitle.style.backgroundColor = "#0000005e";
+    newTitle.style.fontSize = "15px";
     newTitle.style.padding = "2px";
   
 
