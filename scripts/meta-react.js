@@ -76,10 +76,12 @@ class MetaReact {
       el.addEventListener("click", (event) => {
         const approvalText = event.currentTarget.dataset.approval;
         if (approvalText === "settings" ){
-          let imgpos = prompt("On a scale of 0% - 100% how far down do you want your img snippet to be.", "15%");
+          imgpos = prompt("On a scale of 0% - 100% how far down do you want your img snippet to be.", "15%");
           return;
-        }else{
-        this.sendApproval(approvalText);}
+        }else if(approvalText === "custom"){
+          approvalText = prompt("How does your character react?", "wont remember this.");
+        }
+        this.sendApproval(approvalText);
       });
     });
   }
@@ -94,7 +96,7 @@ class MetaReact {
     newContainer.style.transition = "opacity 10s";
 
     newImage.style.backgroundImage = `url(${art})`;
-    newImage.style.backgroundSize = "80%";
+    newImage.style.backgroundSize = "cover";
     newImage.style.backgroundPosition = "100% " + imgpos;
     
     newTitle.innerHTML = `${name} ${approval}`;
