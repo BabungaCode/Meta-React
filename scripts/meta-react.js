@@ -1,5 +1,7 @@
 let socket;
 let module;
+let imgpos = "15%";
+
 
 class Status extends Application {
   static get defaultOptions() {
@@ -73,24 +75,36 @@ class MetaReact {
     Array.from(module.status.element[0].querySelectorAll(".module-control")).forEach((el) => {
       el.addEventListener("click", (event) => {
         const approvalText = event.currentTarget.dataset.approval;
-        this.sendApproval(approvalText);
+        if (approvalText === "settings" ){
+          let imgpos = prompt("On a scale of 0% - 100% how far down do you want your img snippet to be.", "15%");
+          return;
+        }else{
+        this.sendApproval(approvalText);}
       });
     });
   }
 
   approval(name, art, approval) {
-    let newElement = document.createElement("div");
-    newElement.style.transition = "opacity 10s";
-    newElement.style.marginLeft = "32px";
-    newElement.style.backgroundImage = `url(${art})`;
-    newElement.style.backgroundSize = "80%";
-    newElement.style.backgroundPosition = "100% 20%";
-    newElement.innerHTML = `<p>${name} ${approval}</p>`;
-    newElement.style.height = "70px";
-    newElement.style.textShadow = "0px 0px 30px #000";
-    newElement.style.fontSize = "18px";
+    let newContainer = document.createElement('div');
+    let newImage = document.createElement('div')
+    let newTitle = document.createElement('p')
     
-    module.status.element[0].querySelector(".statusbox").appendChild(newElement);
+    newContainer.style.padding = "8px";
+    newContainer.style.height = "60px";
+    newContainer.style.transition = "opacity 10s";
+
+    newImage.style.backgroundImage = `url(${art})`;
+    newImage.style.backgroundSize = "80%";
+    newImage.style.backgroundPosition = "100% " + imgpos;
+    
+    newTitle.innerHTML = `${name} ${approval}`;
+    newTitle.style.textShadow = "0px 0px 30px #000000";
+    newTitle.style.fontSize = "18px";
+    newTitle.style.bottom = "2px";
+
+    module.status.element[0].querySelector(".statusbox").appendChild(newContainer);
+    newContainer.appendChild(newTitle);
+    newContainer.appendChild(newImage);
 
     setTimeout(() => {
       newElement.style.opacity = 0;
