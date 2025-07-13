@@ -40,6 +40,16 @@ class MetaReact {
       default: JSON.stringify({ x: "100%", y: "15%" }),
     });
 
+    // Image size setting
+    game.settings.register("metareact", "imgSize", {
+      name: "Image Size",
+      hint: "Size of your character image snippet (0-200%).",
+      scope: "client",
+      config: false,
+      type: Number,
+      default: 100,
+    });
+
     // Custom approval messages (stored as JSON string)
     game.settings.register("metareact", "customApprovals", {
       name: "Custom Approval Messages",
@@ -162,6 +172,17 @@ class MetaReact {
     this.saveTokenSettings({ imgPosition: position });
   }
 
+  // Get image size for current token (with fallback to global setting)
+  getImageSize() {
+    const tokenSettings = this.getTokenSettings();
+    return tokenSettings.imgSize || this.getSetting("imgSize", 100);
+  }
+
+  // Save image size for current token
+  saveImageSize(size) {
+    this.saveTokenSettings({ imgSize: size });
+  }
+
   // Get custom approval message
   getApprovalMessage() {
     const tokenSettings = this.getTokenSettings();
@@ -196,6 +217,7 @@ class MetaReact {
     const name = this.getCurrentUserName();
     const art = this.getCurrentUserArt();
     const position = this.getImagePosition();
+    const size = this.getImageSize();
     
     // Replace default approval/disapproval with custom messages
     if (approvalText === "approves.") {
@@ -223,62 +245,34 @@ class MetaReact {
   // Show settings dialog
   showSettingsDialog() {
     const currentImgPos = this.getImagePosition();
+    const currentImgSize = this.getImageSize();
     const duration = this.getSetting("approvalDuration", 5);
     const approvalMsg = this.getApprovalMessage();
     const disapprovalMsg = this.getDisapprovalMessage();
-    const currentArt = this.getCurrentUserArt();
-    
-    // Parse current position values to numbers
-    const currentX = parseInt(currentImgPos.x.replace('%', '')) || 100;
-    const currentY = parseInt(currentImgPos.y.replace('%', '')) || 15;
-    const size = parseInt(size.replace('%', '')) || 100;
-
     
     const content = `
       <form>
         <div class="form-group">
-          <label>Image Position Preview:</label>
-          <div id="position-preview" style="
-            width: 300px; 
-            height: 70px; 
-            background-image: url(${currentArt}); 
-            background-size: cover; 
-            background-position: ${currentX}% ${currentY}%;
-            border: 2px solid #ccc;
-            margin: 10px 0;
-            position: relative;
-          ">
-            <div style="
-              position: absolute;
-              bottom: 0;
-              left: 0;
-              width: 100%;
-              background: rgba(0,0,0,0.6);
-              color: white;
-              padding: 2px;
-              font-size: 12px;
-            ">Preview: ${this.getCurrentUserName()} ${approvalMsg}</div>
+          <label>Image Position:</label>
+          <div style="display: flex; gap: 10px;">
+            <div style="flex: 1;">
+              <label>X-Axis (0-100%):</label>
+              <input type="text" name="imgPositionX" value="${currentImgPos.x}" placeholder="100%">
+            </div>
+            <div style="flex: 1;">
+              <label>Y-Axis (0-100%):</label>
+              <input type="text" name="imgPositionY" value="${currentImgPos.y}" placeholder="15%">
+            </div>
           </div>
         </div>
         <div class="form-group">
-          <label>X-Axis Position: <span id="x-value">${currentX}%</span></label>
-          <input type="range" name="imgPositionX" min="0" max="100" value="${currentX}" 
-                 style="width: 100%;" oninput="updatePreview()">
-        </div>
-        <div class="form-group">
-          <label>Y-Axis Position: <span id="y-value">${currentY}%</span></label>
-          <input type="range" name="imgPositionY" min="0" max="100" value="${currentY}" 
-                 style="width: 100%;" oninput="updatePreview()">
-        </div>
-        <div class="form-group">
-          <label>Y-Axis Position: <span id="y-value">${size}%</span></label>
-          <input type="range" name="imgPositionY" min="0" max="200" value="${size}" 
-                 style="width: 100%;" oninput="updatePreview()">
+          <label>Image Size: <span id="sizeValue">${currentImgSize}%</span></label>
+          <input type="range" name="imgSize" min="0" max="200" value="${currentImgSize}" 
+                 oninput="document.getElementById('sizeValue').textContent = this.value + '%'">
         </div>
         <div class="form-group">
           <label>Custom Approval Message:</label>
-          <input type="text" name="approvalMessage" value="${approvalMsg}" placeholder="approves." 
-                 oninput="updatePreview()">
+          <input type="text" name="approvalMessage" value="${approvalMsg}" placeholder="approves.">
         </div>
         <div class="form-group">
           <label>Custom Disapproval Message:</label>
@@ -296,26 +290,6 @@ class MetaReact {
           </select>
         </div>
       </form>
-      <script>
-        function updatePreview() {
-          const xSlider = document.querySelector('input[name="imgPositionX"]');
-          const ySlider = document.querySelector('input[name="imgPositionY"]');
-          const approvalInput = document.querySelector('input[name="approvalMessage"]');
-          const preview = document.getElementById('position-preview');
-          const xValue = document.getElementById('x-value');
-          const yValue = document.getElementById('y-value');
-          
-          const x = xSlider.value;
-          const y = ySlider.value;
-          const approval = approvalInput.value || 'approves.';
-          
-          xValue.textContent = x + '%';
-          yValue.textContent = y + '%';
-          
-          preview.style.backgroundPosition = x + '% ' + y + '%';
-          preview.querySelector('div').textContent = 'Preview: ${this.getCurrentUserName()} ' + approval;
-        }
-      </script>
     `;
 
     new Dialog({
@@ -328,8 +302,9 @@ class MetaReact {
           callback: (html) => {
             const form = html[0].querySelector("form");
             const formData = new FormData(form);
-            const imgPositionX = formData.get("imgPositionX") + "%";
-            const imgPositionY = formData.get("imgPositionY") + "%";
+            const imgPositionX = formData.get("imgPositionX");
+            const imgPositionY = formData.get("imgPositionY");
+            const imgSize = parseInt(formData.get("imgSize"));
             const approvalMessage = formData.get("approvalMessage");
             const disapprovalMessage = formData.get("disapprovalMessage");
             const duration = parseInt(formData.get("duration"));
@@ -343,10 +318,12 @@ class MetaReact {
             // Save settings based on scope
             if (scope === "token") {
               this.saveImagePosition(imgPosition);
+              this.saveImageSize(imgSize);
               this.saveApprovalMessage(approvalMessage);
               this.saveDisapprovalMessage(disapprovalMessage);
             } else {
               this.setSetting("imgPosition", JSON.stringify(imgPosition));
+              this.setSetting("imgSize", imgSize);
               this.setSetting("defaultApprovalMessage", approvalMessage);
               this.setSetting("defaultDisapprovalMessage", disapprovalMessage);
             }
@@ -359,8 +336,7 @@ class MetaReact {
           label: "Cancel"
         }
       },
-      default: "save",
-      width: 450
+      default: "save"
     }).render(true);
   }
 
@@ -373,18 +349,11 @@ class MetaReact {
       savedApprovalsHtml = `
         <div class="form-group">
           <label>Saved Messages:</label>
-          <div id="saved-messages" style="max-height: 150px; overflow-y: auto; border: 1px solid #ccc; padding: 5px; margin: 5px 0;">
+          <div style="max-height: 120px; overflow-y: auto; border: 1px solid #ccc; padding: 8px; margin-bottom: 10px;">
             ${customApprovals.map((msg, index) => `
-              <div style="display: flex; align-items: center; margin: 2px 0; padding: 2px;">
-                <button type="button" onclick="selectMessage('${msg.replace(/'/g, "\\'")}')" 
-                        style="flex: 1; text-align: left; padding: 4px; margin-right: 5px; background: #f0f0f0; border: 1px solid #ddd;">
-                  ${msg}
-                </button>
-                <button type="button" onclick="deleteMessage(${index})" 
-                        style="background: #ff4444; color: white; border: none; padding: 4px 8px; font-size: 12px;" 
-                        title="Delete this message">
-                  ×
-                </button>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; padding: 2px 4px; background: rgba(0,0,0,0.1); border-radius: 3px;">
+                <span style="flex: 1; cursor: pointer; font-size: 12px;" onclick="document.querySelector('input[name=customMessage]').value = '${msg.replace(/'/g, "\\'")}'">${msg}</span>
+                <button type="button" style="background: #dc3545; color: white; border: none; border-radius: 2px; padding: 2px 4px; font-size: 10px; cursor: pointer; margin-left: 4px;" onclick="this.parentElement.remove(); metaReactInstance.removeCustomApproval(${index});">×</button>
               </div>
             `).join('')}
           </div>
@@ -397,34 +366,12 @@ class MetaReact {
         ${savedApprovalsHtml}
         <div class="form-group">
           <label>Custom Message:</label>
-          <input type="text" id="customMessageInput" name="customMessage" placeholder="How does your character react?" style="width: 100%;">
+          <input type="text" name="customMessage" placeholder="How does your character react?" style="width: 100%;">
         </div>
-        <p style="color: #888; font-style: italic; margin: 10px 0;">
-          💾 All custom messages are automatically saved for future use!
+        <p style="color: #888; font-style: italic; margin: 10px 0; font-size: 12px;">
+          💾 All custom messages are automatically saved. Click saved messages to reuse them.
         </p>
       </form>
-      <script>
-        function selectMessage(message) {
-          document.getElementById('customMessageInput').value = message;
-        }
-        
-        function deleteMessage(index) {
-          if (confirm('Delete this saved message?')) {
-            // Get current messages
-            const messages = ${JSON.stringify(customApprovals)};
-            messages.splice(index, 1);
-            
-            // Save updated messages
-            game.settings.set("metareact", "customApprovals", JSON.stringify(messages));
-            
-            // Close and reopen dialog to refresh
-            ui.notifications.info("Message deleted!");
-            setTimeout(() => {
-              metaReactInstance.showCustomApprovalDialog();
-            }, 100);
-          }
-        }
-      </script>
     `;
 
     new Dialog({
@@ -437,7 +384,7 @@ class MetaReact {
           callback: (html) => {
             const form = html[0].querySelector("form");
             const formData = new FormData(form);
-            let customMessage = formData.get("customMessage");
+            const customMessage = formData.get("customMessage");
 
             if (!customMessage.trim()) {
               ui.notifications.warn("Please enter a message!");
@@ -459,9 +406,15 @@ class MetaReact {
           label: "Cancel"
         }
       },
-      default: "send",
-      width: 500
+      default: "send"
     }).render(true);
+  }
+
+  // Remove a custom approval message
+  removeCustomApproval(index) {
+    const customApprovals = JSON.parse(this.getSetting("customApprovals", "[]"));
+    customApprovals.splice(index, 1);
+    this.setSetting("customApprovals", JSON.stringify(customApprovals));
   }
 
   onSocketReady() {
@@ -497,9 +450,10 @@ class MetaReact {
     });
   }
 
-  approval(name, art, approval, imgPosition = null, size) {
-    // Use provided position or fall back to user's setting
+  approval(name, art, approval, imgPosition = null, imgSize = null) {
+    // Use provided position/size or fall back to user's settings
     const position = imgPosition || this.getImagePosition();
+    const size = imgSize || this.getImageSize();
     const duration = this.getSetting("approvalDuration", 5) * 1000;
 
     let newContainer = document.createElement('div');
@@ -511,9 +465,9 @@ class MetaReact {
     newContainer.style.position = "relative";
 
     newContainer.style.backgroundImage = `url(${art})`;
-    newContainer.style.backgroundRepeat = 'no-repeat';
-    newContainer.style.backgroundSize = `${size}`;
+    newContainer.style.backgroundSize = `${size}%`;
     newContainer.style.backgroundPosition = `${position.x} ${position.y}`;
+    newContainer.style.backgroundRepeat = "no-repeat";
     
     newTitle.innerHTML = `${name} ${approval}`;
     newTitle.style.position = "absolute";
@@ -538,6 +492,6 @@ class MetaReact {
 
 new MetaReact();
 
-function approval(name, art, approvalText, imgPosition) {
-  metaReactInstance?.approval(name, art, approvalText, imgPosition);
+function approval(name, art, approvalText, imgPosition, imgSize) {
+  metaReactInstance?.approval(name, art, approvalText, imgPosition, imgSize);
 }
