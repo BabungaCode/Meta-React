@@ -88,29 +88,29 @@ class MetaReact {
 
   approval(name, art, approval) {
     let newContainer = document.createElement('div');
-    let newImage = document.createElement('div')
     let newTitle = document.createElement('p')
     
     newContainer.style.padding = "8px";
     newContainer.style.height = "60px";
     newContainer.style.transition = "opacity 10s";
 
-    newImage.style.backgroundImage = `url(${art})`;
-    newImage.style.backgroundSize = "cover";
-    newImage.style.backgroundPosition = "100% " + imgpos;
+    newContainer.style.backgroundImage = `url(${art})`;
+    newContainer.style.backgroundSize = "cover";
+    newContainer.style.backgroundPosition = "100% " + imgpos;
     
     newTitle.innerHTML = `${name} ${approval}`;
-    newTitle.style.textShadow = "0px 0px 30px #000000";
+    newTitle.style.backgroundColor = "#0000005e"
     newTitle.style.fontSize = "18px";
     newTitle.style.bottom = "2px";
+  
 
     module.status.element[0].querySelector(".statusbox").appendChild(newContainer);
     newContainer.appendChild(newTitle);
-    newContainer.appendChild(newImage);
+
 
     setTimeout(() => {
-      newElement.style.opacity = 0;
-      setTimeout(() => newElement.remove(), 10000);
+      newContainer.style.opacity = 0;
+      setTimeout(() => newContainer.remove(), 10000);
     }, 5000);
   }
 }
