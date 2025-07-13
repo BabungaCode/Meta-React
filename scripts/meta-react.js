@@ -30,14 +30,14 @@ class MetaReact {
 
   // Register all per-player settings
   registerSettings() {
-    // Image position setting
+    // Image position setting (now supports both X and Y)
     game.settings.register("metareact", "imgPosition", {
       name: "Image Position",
-      hint: "Vertical position (%) of your character image snippet.",
+      hint: "Position (X%, Y%) of your character image snippet.",
       scope: "client",
       config: false,
       type: String,
-      default: "15%",
+      default: JSON.stringify({ x: "100%", y: "15%" }),
     });
 
     // Custom approval messages (stored as JSON string)
@@ -48,6 +48,26 @@ class MetaReact {
       config: false,
       type: String,
       default: JSON.stringify([]),
+    });
+
+    // Custom approval message (always persisted)
+    game.settings.register("metareact", "defaultApprovalMessage", {
+      name: "Default Approval Message",
+      hint: "Your custom approval message.",
+      scope: "client",
+      config: false,
+      type: String,
+      default: "approves.",
+    });
+
+    // Custom disapproval message (always persisted)
+    game.settings.register("metareact", "defaultDisapprovalMessage", {
+      name: "Default Disapproval Message",
+      hint: "Your custom disapproval message.",
+      scope: "client",
+      config: false,
+      type: String,
+      default: "disapproves.",
     });
 
     // Preferred approval speed/duration
@@ -133,12 +153,35 @@ class MetaReact {
   // Get image position for current token (with fallback to global setting)
   getImagePosition() {
     const tokenSettings = this.getTokenSettings();
-    return tokenSettings.imgPosition || this.getSetting("imgPosition", "15%");
+    const defaultPos = JSON.parse(this.getSetting("imgPosition", JSON.stringify({ x: "100%", y: "15%" })));
+    return tokenSettings.imgPosition || defaultPos;
   }
 
   // Save image position for current token
   saveImagePosition(position) {
     this.saveTokenSettings({ imgPosition: position });
+  }
+
+  // Get custom approval message
+  getApprovalMessage() {
+    const tokenSettings = this.getTokenSettings();
+    return tokenSettings.approvalMessage || this.getSetting("defaultApprovalMessage", "approves.");
+  }
+
+  // Save custom approval message
+  saveApprovalMessage(message) {
+    this.saveTokenSettings({ approvalMessage: message });
+  }
+
+  // Get custom disapproval message
+  getDisapprovalMessage() {
+    const tokenSettings = this.getTokenSettings();
+    return tokenSettings.disapprovalMessage || this.getSetting("defaultDisapprovalMessage", "disapproves.");
+  }
+
+  // Save custom disapproval message
+  saveDisapprovalMessage(message) {
+    this.saveTokenSettings({ disapprovalMessage: message });
   }
 
   getCurrentUserName() {
@@ -153,6 +196,14 @@ class MetaReact {
     const name = this.getCurrentUserName();
     const art = this.getCurrentUserArt();
     const position = this.getImagePosition();
+    
+    // Replace default approval/disapproval with custom messages
+    if (approvalText === "approves.") {
+      approvalText = this.getApprovalMessage();
+    } else if (approvalText === "disapproves") {
+      approvalText = this.getDisapprovalMessage();
+    }
+    
     socket.executeForEveryone("approval", name, art, approvalText, position);
   }
 
@@ -173,19 +224,38 @@ class MetaReact {
   showSettingsDialog() {
     const currentImgPos = this.getImagePosition();
     const duration = this.getSetting("approvalDuration", 5);
+    const approvalMsg = this.getApprovalMessage();
+    const disapprovalMsg = this.getDisapprovalMessage();
     
     const content = `
       <form>
         <div class="form-group">
-          <label>Image Position (0-100%):</label>
-          <input type="text" name="imgPosition" value="${currentImgPos}" placeholder="15%">
+          <label>Image Position:</label>
+          <div style="display: flex; gap: 10px;">
+            <div style="flex: 1;">
+              <label>X-Axis (0-100%):</label>
+              <input type="text" name="imgPositionX" value="${currentImgPos.x}" placeholder="100%">
+            </div>
+            <div style="flex: 1;">
+              <label>Y-Axis (0-100%):</label>
+              <input type="text" name="imgPositionY" value="${currentImgPos.y}" placeholder="15%">
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Custom Approval Message:</label>
+          <input type="text" name="approvalMessage" value="${approvalMsg}" placeholder="approves.">
+        </div>
+        <div class="form-group">
+          <label>Custom Disapproval Message:</label>
+          <input type="text" name="disapprovalMessage" value="${disapprovalMsg}" placeholder="disapproves.">
         </div>
         <div class="form-group">
           <label>Display Duration (seconds):</label>
           <input type="number" name="duration" value="${duration}" min="1" max="30">
         </div>
         <div class="form-group">
-          <label>This setting applies to:</label>
+          <label>Apply settings to:</label>
           <select name="scope">
             <option value="token">Current Token Only</option>
             <option value="global">All My Tokens</option>
@@ -204,21 +274,30 @@ class MetaReact {
           callback: (html) => {
             const form = html[0].querySelector("form");
             const formData = new FormData(form);
-            const imgPosition = formData.get("imgPosition");
+            const imgPositionX = formData.get("imgPositionX");
+            const imgPositionY = formData.get("imgPositionY");
+            const approvalMessage = formData.get("approvalMessage");
+            const disapprovalMessage = formData.get("disapprovalMessage");
             const duration = parseInt(formData.get("duration"));
             const scope = formData.get("scope");
+
+            const imgPosition = { x: imgPositionX, y: imgPositionY };
 
             // Save duration globally
             this.setSetting("approvalDuration", duration);
 
-            // Save image position based on scope
+            // Save settings based on scope
             if (scope === "token") {
               this.saveImagePosition(imgPosition);
+              this.saveApprovalMessage(approvalMessage);
+              this.saveDisapprovalMessage(disapprovalMessage);
             } else {
-              this.setSetting("imgPosition", imgPosition);
+              this.setSetting("imgPosition", JSON.stringify(imgPosition));
+              this.setSetting("defaultApprovalMessage", approvalMessage);
+              this.setSetting("defaultDisapprovalMessage", disapprovalMessage);
             }
 
-            ui.notifications.info("Settings saved!");
+            ui.notifications.info("Settings saved and will persist!");
           }
         },
         cancel: {
@@ -238,7 +317,7 @@ class MetaReact {
     if (customApprovals.length > 0) {
       savedApprovalsHtml = `
         <div class="form-group">
-          <label>Quick Select:</label>
+          <label>Quick Select (saved messages):</label>
           <select name="quickSelect">
             <option value="">-- Select a saved message --</option>
             ${customApprovals.map((msg, index) => `<option value="${index}">${msg}</option>`).join('')}
@@ -254,11 +333,9 @@ class MetaReact {
           <label>Custom Message:</label>
           <input type="text" name="customMessage" placeholder="How does your character react?" style="width: 100%;">
         </div>
-        <div class="form-group">
-          <label>
-            <input type="checkbox" name="saveMessage"> Save this message for later
-          </label>
-        </div>
+        <p style="color: #888; font-style: italic; margin: 10px 0;">
+          💾 All custom messages are automatically saved for future use!
+        </p>
       </form>
     `;
 
@@ -274,7 +351,6 @@ class MetaReact {
             const formData = new FormData(form);
             const quickSelect = formData.get("quickSelect");
             let customMessage = formData.get("customMessage");
-            const saveMessage = formData.get("saveMessage");
 
             // Use quick select if chosen
             if (quickSelect !== "" && customApprovals[quickSelect]) {
@@ -286,13 +362,14 @@ class MetaReact {
               return;
             }
 
-            // Save message if requested
-            if (saveMessage && !customApprovals.includes(customMessage)) {
+            // Always save the message if it's new
+            if (!customApprovals.includes(customMessage)) {
               customApprovals.push(customMessage);
               this.setSetting("customApprovals", JSON.stringify(customApprovals));
             }
 
             this.sendApproval(customMessage);
+            ui.notifications.info("Custom message sent and saved!");
           }
         },
         cancel: {
@@ -352,7 +429,7 @@ class MetaReact {
 
     newContainer.style.backgroundImage = `url(${art})`;
     newContainer.style.backgroundSize = "cover";
-    newContainer.style.backgroundPosition = "100% " + position;
+    newContainer.style.backgroundPosition = `${position.x} ${position.y}`;
     
     newTitle.innerHTML = `${name} ${approval}`;
     newTitle.style.position = "absolute";
