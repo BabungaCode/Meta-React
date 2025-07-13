@@ -258,7 +258,6 @@ class MetaReact {
     const content = `
       <form>
         <div class="form-group">
-          <label>Image Preview:</label>
           <div id="imagePreview" style="
             height: 70px; 
             width: 300px; 
@@ -279,7 +278,8 @@ class MetaReact {
               padding: 2px;
               bottom: 0;
               left: 0;
-              width: 296px;
+              width: 300px;
+              height:70px
               font-size: 15px;
               text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
             ">Preview: ${this.getCurrentUserName()} ${approvalMsg}</div>
