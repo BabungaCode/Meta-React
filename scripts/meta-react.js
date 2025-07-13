@@ -81,6 +81,7 @@ class MetaReact {
         }else if(approvalText === "custom"){
           let customText = prompt("How does your character react?", "wont remember this.");
           this.sendApproval(customText);
+          return;
         }
         this.sendApproval(approvalText);
       });
@@ -106,7 +107,7 @@ class MetaReact {
     newTitle.style.fontSize = "15px";
     newTitle.style.bottom = "0px";
     newTitle.style.left = "0px";
-    newTitle.style.width = "100%";
+    newTitle.style.width = "300px";
     newTitle.style.padding = "2px";
   
 
@@ -115,7 +116,7 @@ class MetaReact {
 
 
     setTimeout(() => {
-      newContaine.style.opacity = 0;
+      newContainer.style.opacity = 0;
       setTimeout(() => newContainer.remove(), 1000);
     }, 5000);
   }
