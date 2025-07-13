@@ -204,7 +204,7 @@ class MetaReact {
       approvalText = this.getDisapprovalMessage();
     }
     
-    socket.executeForEveryone("approval", name, art, approvalText, position);
+    socket.executeForEveryone("approval", name, art, approvalText, position, size);
   }
 
   cleanWindowClass(application) {
@@ -231,6 +231,8 @@ class MetaReact {
     // Parse current position values to numbers
     const currentX = parseInt(currentImgPos.x.replace('%', '')) || 100;
     const currentY = parseInt(currentImgPos.y.replace('%', '')) || 15;
+    const size = parseInt(size.replace('%', '')) || 100;
+
     
     const content = `
       <form>
@@ -495,7 +497,7 @@ class MetaReact {
     });
   }
 
-  approval(name, art, approval, imgPosition = null) {
+  approval(name, art, approval, imgPosition = null, size) {
     // Use provided position or fall back to user's setting
     const position = imgPosition || this.getImagePosition();
     const duration = this.getSetting("approvalDuration", 5) * 1000;
