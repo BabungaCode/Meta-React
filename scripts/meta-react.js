@@ -269,6 +269,11 @@ class MetaReact {
                  style="width: 100%;" oninput="updatePreview()">
         </div>
         <div class="form-group">
+          <label>Y-Axis Position: <span id="y-value">${size}%</span></label>
+          <input type="range" name="imgPositionY" min="0" max="200" value="${size}" 
+                 style="width: 100%;" oninput="updatePreview()">
+        </div>
+        <div class="form-group">
           <label>Custom Approval Message:</label>
           <input type="text" name="approvalMessage" value="${approvalMsg}" placeholder="approves." 
                  oninput="updatePreview()">
@@ -504,7 +509,8 @@ class MetaReact {
     newContainer.style.position = "relative";
 
     newContainer.style.backgroundImage = `url(${art})`;
-    newContainer.style.backgroundSize = "cover";
+    newContainer.style.backgroundRepeat = 'no-repeat';
+    newContainer.style.backgroundSize = `${size}`;
     newContainer.style.backgroundPosition = `${position.x} ${position.y}`;
     
     newTitle.innerHTML = `${name} ${approval}`;
