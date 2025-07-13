@@ -94,17 +94,17 @@ class MetaReact {
     newContainer.style.padding = "8px";
     newContainer.style.height = "60px";
     newContainer.style.transition = "opacity 1s";
-    newContainer.style.display = "table-cell";
-    newContainer.style.verticalAlign= "bottom";
+    newContainer.style.position = "relative";
 
     newContainer.style.backgroundImage = `url(${art})`;
     newContainer.style.backgroundSize = "cover";
     newContainer.style.backgroundPosition = "100% " + imgpos;
     
     newTitle.innerHTML = `${name} ${approval}`;
-    newTitle.style.position = "relative";
+    newTitle.style.position = "absolute";
     newTitle.style.backgroundColor = "#0000005e";
     newTitle.style.fontSize = "15px";
+    newTitle.style.bottom = "0px";
     newTitle.style.padding = "2px";
   
 
@@ -113,7 +113,7 @@ class MetaReact {
 
 
     setTimeout(() => {
-      newContainer.style.opacity = 0;
+      newContaine.style.opacity = 0;
       setTimeout(() => newContainer.remove(), 1000);
     }, 5000);
   }
