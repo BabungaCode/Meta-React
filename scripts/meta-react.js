@@ -89,10 +89,11 @@ class MetaReact {
 
   approval(name, art, approval) {
     let newContainer = document.createElement('div');
-    let newTitle = document.createElement('p')
+    let newTitle = document.createElement('div')
     
     newContainer.style.padding = "8px";
     newContainer.style.height = "60px";
+    newContainer.style.width = "360px";
     newContainer.style.transition = "opacity 1s";
     newContainer.style.position = "relative";
 
@@ -105,6 +106,8 @@ class MetaReact {
     newTitle.style.backgroundColor = "#0000005e";
     newTitle.style.fontSize = "15px";
     newTitle.style.bottom = "0px";
+    newTitle.style.left = "0px";
+    newTitle.style.width = "100%";
     newTitle.style.padding = "2px";
   
 
