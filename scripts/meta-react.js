@@ -257,17 +257,21 @@ class MetaReact {
     
     const content = `
       <form>
-        <div class="form-group">
+        <div class="form-group" style="
+          flex-wrap:wrap; 
+          height:70px;
+        ">
+        <center>Preview:</center>
           <div id="imagePreview" style="
+            position: fixed;
+            margin-left:42;
             height: 70px; 
             width: 300px; 
             border: 2px solid #ccc; 
-            margin: 10px 0;
             background-image: url('${currentArt}');
             background-size: ${currentImgSize}%;
             background-position: ${currentImgPos.x} ${currentImgPos.y};
             background-repeat: no-repeat;
-            position: relative;
             overflow: hidden;
             box-sizing: border-box;
           ">
@@ -407,7 +411,7 @@ class MetaReact {
             ${customApprovals.map((msg, index) => `
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; padding: 2px 4px; background: rgba(0,0,0,0.1); border-radius: 3px;">
                 <span style="flex: 1; cursor: pointer; font-size: 12px;" onclick="document.querySelector('input[name=customMessage]').value = '${msg.replace(/'/g, "\\'")}'">${msg}</span>
-                <button type="button" style="background: #dc3545; color: white; border: none; border-radius: 2px; padding: 2px 4px; font-size: 10px; cursor: pointer; margin-left: 4px;" onclick="this.parentElement.remove(); metaReactInstance.removeCustomApproval(${index});">×</button>
+                <button type="button" style="height:15px; width:15px; line-height:10px; background: #dc3545; color: white; border: none; border-radius: 2px; padding: 2px 4px; font-size: 10px; cursor: pointer; margin-left: 4px;" onclick="this.parentElement.remove(); metaReactInstance.removeCustomApproval(${index});">×</button>
               </div>
             `).join('')}
           </div>
@@ -423,7 +427,7 @@ class MetaReact {
           <input type="text" name="customMessage" placeholder="How does your character react?" style="width: 100%;">
         </div>
         <p style="color: #888; font-style: italic; margin: 10px 0; font-size: 12px;">
-          💾 All custom messages are automatically saved. Click saved messages to reuse them.
+          💾 All custom messages are automatically saved. <br> Click saved messages to reuse them! :)
         </p>
       </form>
     `;
