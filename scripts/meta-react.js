@@ -269,6 +269,8 @@ class MetaReact {
             background-position: ${currentImgPos.x} ${currentImgPos.y};
             background-repeat: no-repeat;
             position: relative;
+            overflow: hidden;
+            box-sizing: border-box;
           ">
             <div style="
               position: absolute;
