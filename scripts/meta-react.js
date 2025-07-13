@@ -81,13 +81,14 @@ class MetaReact {
   approval(name, art, approval) {
     let newElement = document.createElement("div");
     newElement.style.transition = "opacity 10s";
-    newElement.style.marginLeft = "8px";
+    newElement.style.marginLeft = "32px";
     newElement.style.backgroundImage = `url(${art})`;
     newElement.style.backgroundSize = "cover";
-    newElement.style.backgroundPosition = "center";
+    newElement.style.backgroundPosition = "50% 25%";
     newElement.innerHTML = `<p>${name} ${approval}</p>`;
-    newElement.style.height = "auto";
-    newElement.style.width = "45px";
+    newElement.style.height = "30px";
+    newElement.style.textShadow = "0px 0px 5px #000";
+    
 
     module.status.element[0].querySelector(".statusbox").appendChild(newElement);
 
