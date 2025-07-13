@@ -92,16 +92,18 @@ class MetaReact {
     
     newContainer.style.padding = "8px";
     newContainer.style.height = "60px";
-    newContainer.style.transition = "opacity 10s";
+    newContainer.style.transition = "opacity 1s";
 
     newContainer.style.backgroundImage = `url(${art})`;
     newContainer.style.backgroundSize = "cover";
     newContainer.style.backgroundPosition = "100% " + imgpos;
     
     newTitle.innerHTML = `${name} ${approval}`;
+    newTitle.style.position = "relative"
     newTitle.style.backgroundColor = "#0000005e"
-    newTitle.style.fontSize = "18px";
-    newTitle.style.bottom = "2px";
+    newTitle.style.fontSize = "16px";
+    newTitle.style.bottom = "0px";
+    newTitle.style.padding = "2px";
   
 
     module.status.element[0].querySelector(".statusbox").appendChild(newContainer);
@@ -110,7 +112,7 @@ class MetaReact {
 
     setTimeout(() => {
       newContainer.style.opacity = 0;
-      setTimeout(() => newContainer.remove(), 10000);
+      setTimeout(() => newContainer.remove(), 1000);
     }, 5000);
   }
 }
