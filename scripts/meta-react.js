@@ -24,7 +24,7 @@ const sendApproval = (approval) => {
   console.log(approval);
   const name = getCurrentUserName();
   const art = getCurrentUserArt();
-  socket.executeForEveryone("approval", name, approval);
+  socket.executeForEveryone("approval", name, art, approval);
 };
 
 const cleanWindowClass = (application) => {
@@ -60,7 +60,7 @@ Hooks.once("ready", async () => {
     module.status.element[0].querySelectorAll(".module-control")
   ).forEach((el) =>
     el.addEventListener("click", (event) => {
-      sendApproval(event.currentTarget.dataset.approval === "true");
+      sendApproval(event.currentTarget.dataset.approval);
     })
   );
 });
