@@ -26,7 +26,7 @@ const sendApproval = (approval) => {
   console.log(approval);
   const name = getCurrentUserName();
   const art = getCurrentUserArt();
-  socket.executeForEveryone("approval", name, art, approval);
+  socket.executeForEveryone("approval", name, approval, art);
 };
 
 const cleanWindowClass = (application) => {
