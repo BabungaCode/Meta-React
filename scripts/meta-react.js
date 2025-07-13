@@ -79,8 +79,8 @@ class MetaReact {
           imgpos = prompt("On a scale of 0% - 100% how far down do you want your img snippet to be.", "15%");
           return;
         }else if(approvalText === "custom"){
-          approvalText = prompt("How does your character react?", "wont remember this.");
-          this.sendApproval(approvalText);
+          let customText = prompt("How does your character react?", "wont remember this.");
+          this.sendApproval(customText);
         }
         this.sendApproval(approvalText);
       });
@@ -91,9 +91,8 @@ class MetaReact {
     let newContainer = document.createElement('div');
     let newTitle = document.createElement('div')
     
-    newContainer.style.padding = "8px";
-    newContainer.style.height = "60px";
-    newContainer.style.width = "360px";
+    newContainer.style.height = "70px";
+    newContainer.style.width = "300px";
     newContainer.style.transition = "opacity 1s";
     newContainer.style.position = "relative";
 
