@@ -67,7 +67,7 @@ Hooks.once("ready", async () => {
   );
 });
 
-const approval = (name, approval) => {
+const approval = (name, approval, art) => {
   let newElement = document.createElement("div");
   //Add transition styles to the new element
   newElement.style.transition = "opacity 1s";
