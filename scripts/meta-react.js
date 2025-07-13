@@ -1,5 +1,3 @@
-//sugma
-
 let socket;
 let module;
 
@@ -19,69 +17,86 @@ class Status extends Application {
   }
 }
 
-const getCurrentUserName = () => canvas.tokens.controlled[0].nameplate._text;
-const getCurrentUserArt = () => canvas.tokens.controlled[0].texture.baseTexture.textureCacheIds[0];
+let metaReactInstance;
 
-const sendApproval = (approval) => {
-  console.log(approval);
-  const name = getCurrentUserName();
-  const art = getCurrentUserArt();
-  socket.executeForEveryone("approval", name, approval, art);
-};
+class MetaReact {
+  constructor() {
+    metaReactInstance = this;
 
-const cleanWindowClass = (application) => {
-  const app = application.element[0];
-  app.style.boxShadow = "none";
-  app.style.background = "none";
-  app.querySelector(".window-content").classList.remove("window-content");
-  app.querySelector(".window-header").style.backgroundColor =
-    "rgba(0, 0, 0, 0.5)";
-  app.querySelector(".window-header").style.border = "0";
-  Array.from(app.querySelectorAll("button")).forEach((el) =>
-    app.querySelector(".window-header").appendChild(el)
-  );
-  app.querySelector(".close").remove();
-};
+    Hooks.once("socketlib.ready", this.onSocketReady.bind(this));
+    Hooks.once("init", this.onInit.bind(this));
+    Hooks.once("ready", this.onReady.bind(this));
+  }
 
-Hooks.once("socketlib.ready", () => {
-  socket = socketlib.registerModule("metareact");
-  socket.register("approval", approval);
-  console.log("The socket is ready to be used.");
-});
+  getCurrentUserName() {
+    return canvas.tokens.controlled[0]?.nameplate?._text || "Unknown";
+  }
 
-Hooks.once("init", () => {
-  console.log("Meta React | Initialising the module.");
-  module = game.modules.get("metareact");
-  module.status = new Status();
-  module.status.render(true);
-});
+  getCurrentUserArt() {
+    return canvas.tokens.controlled[0]?.texture?.baseTexture?.textureCacheIds[0] || "";
+  }
 
-Hooks.once("ready", async () => {
-  cleanWindowClass(module.status);
-  Array.from(
-    module.status.element[0].querySelectorAll(".module-control")
-  ).forEach((el) =>
-    el.addEventListener("click", (event) => {
-      sendApproval(event.currentTarget.dataset.approval);
-    })
-  );
-});
+  sendApproval(approvalText) {
+    const name = this.getCurrentUserName();
+    const art = this.getCurrentUserArt();
+    socket.executeForEveryone("approval", name, art, approvalText);
+  }
 
-const approval = (name, approval, art) => {
-  let newElement = document.createElement("div");
-  //Add transition styles to the new element
-  newElement.style.transition = "opacity 1s";
-  newElement.style.paddingLeft = "8px";
-  newElement.style.backgroundImage = art;
-  newElement.style.backgroundSize = "fill";
-  console.log(approval);
-  newElement.innerHTML = `<p>${name} ${approval}.</p>`;
-  module.status.element[0].querySelector(".statusbox").appendChild(newElement);
+  cleanWindowClass(application) {
+    const app = application.element[0];
+    app.style.boxShadow = "none";
+    app.style.background = "none";
+    app.querySelector(".window-content").classList.remove("window-content");
+    app.querySelector(".window-header").style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+    app.querySelector(".window-header").style.border = "0";
+    Array.from(app.querySelectorAll("button")).forEach((el) =>
+      app.querySelector(".window-header").appendChild(el)
+    );
+    app.querySelector(".close")?.remove();
+  }
 
-  setTimeout(() => {
-    newElement.style.opacity = 0;
+  onSocketReady() {
+    socket = socketlib.registerModule("metareact");
+    socket.register("approval", approval);
+    console.log("The socket is ready to be used.");
+  }
+
+  onInit() {
+    console.log("Meta React | Initialising the module.");
+    module = game.modules.get("metareact");
+    module.status = new Status();
+    module.status.render(true);
+  }
+
+  onReady() {
+    this.cleanWindowClass(module.status);
+    Array.from(module.status.element[0].querySelectorAll(".module-control")).forEach((el) => {
+      el.addEventListener("click", (event) => {
+        const approvalText = event.currentTarget.dataset.approval;
+        this.sendApproval(approvalText);
+      });
+    });
+  }
+
+  approval(name, art, approval) {
+    let newElement = document.createElement("div");
+    newElement.style.transition = "opacity 1s";
+    newElement.style.paddingLeft = "8px";
+    newElement.style.backgroundImage = `url(${art})`;
+    newElement.style.backgroundSize = "cover";
+    newElement.innerHTML = `<p>${name} ${approval}.</p>`;
+
+    module.status.element[0].querySelector(".statusbox").appendChild(newElement);
+
     setTimeout(() => {
-      newElement.remove();
-    }, 1000);
-  }, 5000);
-};
+      newElement.style.opacity = 0;
+      setTimeout(() => newElement.remove(), 1000);
+    }, 5000);
+  }
+}
+
+new MetaReact();
+
+function approval(name, art, approvalText) {
+  metaReactInstance?.approval(name, art, approvalText)
+}
