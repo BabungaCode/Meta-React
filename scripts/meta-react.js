@@ -226,25 +226,52 @@ class MetaReact {
     const duration = this.getSetting("approvalDuration", 5);
     const approvalMsg = this.getApprovalMessage();
     const disapprovalMsg = this.getDisapprovalMessage();
+    const currentArt = this.getCurrentUserArt();
+    
+    // Parse current position values to numbers
+    const currentX = parseInt(currentImgPos.x.replace('%', '')) || 100;
+    const currentY = parseInt(currentImgPos.y.replace('%', '')) || 15;
     
     const content = `
       <form>
         <div class="form-group">
-          <label>Image Position:</label>
-          <div style="display: flex; gap: 10px;">
-            <div style="flex: 1;">
-              <label>X-Axis (0-100%):</label>
-              <input type="text" name="imgPositionX" value="${currentImgPos.x}" placeholder="100%">
-            </div>
-            <div style="flex: 1;">
-              <label>Y-Axis (0-100%):</label>
-              <input type="text" name="imgPositionY" value="${currentImgPos.y}" placeholder="15%">
-            </div>
+          <label>Image Position Preview:</label>
+          <div id="position-preview" style="
+            width: 300px; 
+            height: 70px; 
+            background-image: url(${currentArt}); 
+            background-size: cover; 
+            background-position: ${currentX}% ${currentY}%;
+            border: 2px solid #ccc;
+            margin: 10px 0;
+            position: relative;
+          ">
+            <div style="
+              position: absolute;
+              bottom: 0;
+              left: 0;
+              width: 100%;
+              background: rgba(0,0,0,0.6);
+              color: white;
+              padding: 2px;
+              font-size: 12px;
+            ">Preview: ${this.getCurrentUserName()} ${approvalMsg}</div>
           </div>
         </div>
         <div class="form-group">
+          <label>X-Axis Position: <span id="x-value">${currentX}%</span></label>
+          <input type="range" name="imgPositionX" min="0" max="100" value="${currentX}" 
+                 style="width: 100%;" oninput="updatePreview()">
+        </div>
+        <div class="form-group">
+          <label>Y-Axis Position: <span id="y-value">${currentY}%</span></label>
+          <input type="range" name="imgPositionY" min="0" max="100" value="${currentY}" 
+                 style="width: 100%;" oninput="updatePreview()">
+        </div>
+        <div class="form-group">
           <label>Custom Approval Message:</label>
-          <input type="text" name="approvalMessage" value="${approvalMsg}" placeholder="approves.">
+          <input type="text" name="approvalMessage" value="${approvalMsg}" placeholder="approves." 
+                 oninput="updatePreview()">
         </div>
         <div class="form-group">
           <label>Custom Disapproval Message:</label>
@@ -262,6 +289,26 @@ class MetaReact {
           </select>
         </div>
       </form>
+      <script>
+        function updatePreview() {
+          const xSlider = document.querySelector('input[name="imgPositionX"]');
+          const ySlider = document.querySelector('input[name="imgPositionY"]');
+          const approvalInput = document.querySelector('input[name="approvalMessage"]');
+          const preview = document.getElementById('position-preview');
+          const xValue = document.getElementById('x-value');
+          const yValue = document.getElementById('y-value');
+          
+          const x = xSlider.value;
+          const y = ySlider.value;
+          const approval = approvalInput.value || 'approves.';
+          
+          xValue.textContent = x + '%';
+          yValue.textContent = y + '%';
+          
+          preview.style.backgroundPosition = x + '% ' + y + '%';
+          preview.querySelector('div').textContent = 'Preview: ${this.getCurrentUserName()} ' + approval;
+        }
+      </script>
     `;
 
     new Dialog({
@@ -274,8 +321,8 @@ class MetaReact {
           callback: (html) => {
             const form = html[0].querySelector("form");
             const formData = new FormData(form);
-            const imgPositionX = formData.get("imgPositionX");
-            const imgPositionY = formData.get("imgPositionY");
+            const imgPositionX = formData.get("imgPositionX") + "%";
+            const imgPositionY = formData.get("imgPositionY") + "%";
             const approvalMessage = formData.get("approvalMessage");
             const disapprovalMessage = formData.get("disapprovalMessage");
             const duration = parseInt(formData.get("duration"));
@@ -305,7 +352,8 @@ class MetaReact {
           label: "Cancel"
         }
       },
-      default: "save"
+      default: "save",
+      width: 450
     }).render(true);
   }
 
@@ -317,11 +365,22 @@ class MetaReact {
     if (customApprovals.length > 0) {
       savedApprovalsHtml = `
         <div class="form-group">
-          <label>Quick Select (saved messages):</label>
-          <select name="quickSelect">
-            <option value="">-- Select a saved message --</option>
-            ${customApprovals.map((msg, index) => `<option value="${index}">${msg}</option>`).join('')}
-          </select>
+          <label>Saved Messages:</label>
+          <div id="saved-messages" style="max-height: 150px; overflow-y: auto; border: 1px solid #ccc; padding: 5px; margin: 5px 0;">
+            ${customApprovals.map((msg, index) => `
+              <div style="display: flex; align-items: center; margin: 2px 0; padding: 2px;">
+                <button type="button" onclick="selectMessage('${msg.replace(/'/g, "\\'")}')" 
+                        style="flex: 1; text-align: left; padding: 4px; margin-right: 5px; background: #f0f0f0; border: 1px solid #ddd;">
+                  ${msg}
+                </button>
+                <button type="button" onclick="deleteMessage(${index})" 
+                        style="background: #ff4444; color: white; border: none; padding: 4px 8px; font-size: 12px;" 
+                        title="Delete this message">
+                  ×
+                </button>
+              </div>
+            `).join('')}
+          </div>
         </div>
       `;
     }
@@ -331,12 +390,34 @@ class MetaReact {
         ${savedApprovalsHtml}
         <div class="form-group">
           <label>Custom Message:</label>
-          <input type="text" name="customMessage" placeholder="How does your character react?" style="width: 100%;">
+          <input type="text" id="customMessageInput" name="customMessage" placeholder="How does your character react?" style="width: 100%;">
         </div>
         <p style="color: #888; font-style: italic; margin: 10px 0;">
           💾 All custom messages are automatically saved for future use!
         </p>
       </form>
+      <script>
+        function selectMessage(message) {
+          document.getElementById('customMessageInput').value = message;
+        }
+        
+        function deleteMessage(index) {
+          if (confirm('Delete this saved message?')) {
+            // Get current messages
+            const messages = ${JSON.stringify(customApprovals)};
+            messages.splice(index, 1);
+            
+            // Save updated messages
+            game.settings.set("metareact", "customApprovals", JSON.stringify(messages));
+            
+            // Close and reopen dialog to refresh
+            ui.notifications.info("Message deleted!");
+            setTimeout(() => {
+              metaReactInstance.showCustomApprovalDialog();
+            }, 100);
+          }
+        }
+      </script>
     `;
 
     new Dialog({
@@ -349,13 +430,7 @@ class MetaReact {
           callback: (html) => {
             const form = html[0].querySelector("form");
             const formData = new FormData(form);
-            const quickSelect = formData.get("quickSelect");
             let customMessage = formData.get("customMessage");
-
-            // Use quick select if chosen
-            if (quickSelect !== "" && customApprovals[quickSelect]) {
-              customMessage = customApprovals[quickSelect];
-            }
 
             if (!customMessage.trim()) {
               ui.notifications.warn("Please enter a message!");
@@ -377,7 +452,8 @@ class MetaReact {
           label: "Cancel"
         }
       },
-      default: "send"
+      default: "send",
+      width: 500
     }).render(true);
   }
 
