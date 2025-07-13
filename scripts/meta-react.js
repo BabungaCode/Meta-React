@@ -83,13 +83,13 @@ class MetaReact {
     newElement.style.transition = "opacity 10s";
     newElement.style.marginLeft = "32px";
     newElement.style.backgroundImage = `url(${art})`;
-    newElement.style.backgroundSize = "cover";
-    newElement.style.backgroundPosition = "50% 25%";
+    newElement.style.backgroundSize = "80%";
+    newElement.style.backgroundPosition = "100% 20%";
     newElement.innerHTML = `<p>${name} ${approval}</p>`;
-    newElement.style.height = "30px";
-    newElement.style.textShadow = "0px 0px 5px #000";
+    newElement.style.height = "70px";
+    newElement.style.textShadow = "0px 0px 30px #000";
+    newElement.style.fontSize = "18px";
     
-
     module.status.element[0].querySelector(".statusbox").appendChild(newElement);
 
     setTimeout(() => {
