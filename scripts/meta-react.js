@@ -249,30 +249,59 @@ class MetaReact {
     const duration = this.getSetting("approvalDuration", 5);
     const approvalMsg = this.getApprovalMessage();
     const disapprovalMsg = this.getDisapprovalMessage();
+    const currentArt = this.getCurrentUserArt();
+    
+    // Parse X and Y values to numbers (remove % and convert)
+    const xValue = parseInt(currentImgPos.x.replace('%', ''));
+    const yValue = parseInt(currentImgPos.y.replace('%', ''));
     
     const content = `
       <form>
         <div class="form-group">
-          <label>Image Position:</label>
-          <div style="display: flex; gap: 10px;">
-            <div style="flex: 1;">
-              <label>X-Axis (0-100%):</label>
-              <input type="text" name="imgPositionX" value="${currentImgPos.x}" placeholder="100%">
-            </div>
-            <div style="flex: 1;">
-              <label>Y-Axis (0-100%):</label>
-              <input type="text" name="imgPositionY" value="${currentImgPos.y}" placeholder="15%">
-            </div>
+          <label>Image Preview:</label>
+          <div id="imagePreview" style="
+            height: 70px; 
+            width: 300px; 
+            border: 2px solid #ccc; 
+            margin: 10px 0;
+            background-image: url('${currentArt}');
+            background-size: ${currentImgSize}%;
+            background-position: ${currentImgPos.x} ${currentImgPos.y};
+            background-repeat: no-repeat;
+            position: relative;
+          ">
+            <div style="
+              position: absolute;
+              background-color: #0000005e;
+              color: white;
+              padding: 2px;
+              bottom: 0;
+              left: 0;
+              width: 296px;
+              font-size: 15px;
+              text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            ">Preview: ${this.getCurrentUserName()} ${approvalMsg}</div>
           </div>
+        </div>
+        <div class="form-group">
+          <label>Image Position X: <span id="xValue">${xValue}%</span></label>
+          <input type="range" name="imgPositionX" min="0" max="100" value="${xValue}" 
+                 oninput="updatePreview()">
+        </div>
+        <div class="form-group">
+          <label>Image Position Y: <span id="yValue">${yValue}%</span></label>
+          <input type="range" name="imgPositionY" min="0" max="100" value="${yValue}" 
+                 oninput="updatePreview()">
         </div>
         <div class="form-group">
           <label>Image Size: <span id="sizeValue">${currentImgSize}%</span></label>
           <input type="range" name="imgSize" min="0" max="200" value="${currentImgSize}" 
-                 oninput="document.getElementById('sizeValue').textContent = this.value + '%'">
+                 oninput="updatePreview()">
         </div>
         <div class="form-group">
           <label>Custom Approval Message:</label>
-          <input type="text" name="approvalMessage" value="${approvalMsg}" placeholder="approves.">
+          <input type="text" name="approvalMessage" value="${approvalMsg}" placeholder="approves." 
+                 oninput="updatePreview()">
         </div>
         <div class="form-group">
           <label>Custom Disapproval Message:</label>
@@ -289,6 +318,29 @@ class MetaReact {
             <option value="global">All My Tokens</option>
           </select>
         </div>
+        <script>
+          function updatePreview() {
+            const xSlider = document.querySelector('input[name="imgPositionX"]');
+            const ySlider = document.querySelector('input[name="imgPositionY"]');
+            const sizeSlider = document.querySelector('input[name="imgSize"]');
+            const approvalInput = document.querySelector('input[name="approvalMessage"]');
+            const preview = document.getElementById('imagePreview');
+            const previewText = preview.querySelector('div');
+            
+            const xVal = xSlider.value;
+            const yVal = ySlider.value;
+            const sizeVal = sizeSlider.value;
+            const approvalVal = approvalInput.value || 'approves.';
+            
+            document.getElementById('xValue').textContent = xVal + '%';
+            document.getElementById('yValue').textContent = yVal + '%';
+            document.getElementById('sizeValue').textContent = sizeVal + '%';
+            
+            preview.style.backgroundPosition = xVal + '% ' + yVal + '%';
+            preview.style.backgroundSize = sizeVal + '%';
+            previewText.textContent = 'Preview: ${this.getCurrentUserName()} ' + approvalVal;
+          }
+        </script>
       </form>
     `;
 
@@ -302,8 +354,8 @@ class MetaReact {
           callback: (html) => {
             const form = html[0].querySelector("form");
             const formData = new FormData(form);
-            const imgPositionX = formData.get("imgPositionX");
-            const imgPositionY = formData.get("imgPositionY");
+            const imgPositionX = formData.get("imgPositionX") + "%";
+            const imgPositionY = formData.get("imgPositionY") + "%";
             const imgSize = parseInt(formData.get("imgSize"));
             const approvalMessage = formData.get("approvalMessage");
             const disapprovalMessage = formData.get("disapprovalMessage");
