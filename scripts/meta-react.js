@@ -259,14 +259,14 @@ class MetaReact {
       <form>
         <div class="form-group" style="
           flex-wrap:wrap; 
-          height:70px;
+          height:90px;
         ">
-        <center>Preview:</center>
+        <div style="position:absolute; top:35px; height:20px; margin-left:42px;>Reaction Preview:</div>
           <div id="imagePreview" style="
             position: fixed;
-            margin-left:42;
+            margin-left:42px;
             height: 70px; 
-            width: 300px; 
+            width: 300px;
             border: 2px solid #ccc; 
             background-image: url('${currentArt}');
             background-size: ${currentImgSize}%;
@@ -286,7 +286,7 @@ class MetaReact {
               height:70px
               font-size: 15px;
               text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-            ">Preview: ${this.getCurrentUserName()} ${approvalMsg}</div>
+            ">${this.getCurrentUserName()} ${approvalMsg}</div>
           </div>
         </div>
         <div class="form-group">
