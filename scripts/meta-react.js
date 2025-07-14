@@ -261,7 +261,7 @@ class MetaReact {
           flex-wrap:wrap; 
           height:90px;
         ">
-        <div style="position:absolute; top:35px; height:20px; margin-left:42px;>Reaction Preview:</div>
+        <div style="position:absolute; top:35px; height:20px; margin-left:42px;">Reaction Preview:</div>
           <div id="imagePreview" style="
             position: fixed;
             margin-left:42px;

@@ -3,7 +3,7 @@
   "title": "Meta React",
   "description": "Adds character reactions to your game!",
   "authors": [{ "name": "Licht" }],
-  "version": "1.0.35",
+  "version": "1.0.36",
   "compatibility": {
     "minimum": "12",
     "verified": "13"
@@ -22,7 +22,7 @@
   },
   "socket": true,
   "url": "https://github.com/BabungaCode/Meta-React",
-  "download": "https://github.com/BabungaCode/Meta-React/archive/refs/tags/v1.0.35.zip",
+  "download": "https://github.com/BabungaCode/Meta-React/archive/refs/tags/v1.0.36.zip",
   "manifest": "https://raw.githubusercontent.com/BabungaCode/Meta-React/main/module.json",
   "bugs": "https://github.com/BabungaCode/Meta-React/issues"
 }
